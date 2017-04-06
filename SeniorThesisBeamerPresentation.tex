@@ -59,11 +59,11 @@
 % ============================================================
 % start the content of the presentation
 % ============================================================
-\begin{frame}{Contents}
-\frametitle{Contents}
-    \tableofcontents[
-]
-\end{frame}
+%\begin{frame}{Contents}
+%\frametitle{Contents}
+    %\tableofcontents[
+%]
+%\end{frame}
 
 \section{Introduction}
 
@@ -76,6 +76,12 @@
 \item Environmental Protection
 \end{itemize}
 
+ \includegraphics[width=0.4\linewidth]{deepwater.jpg}
+\tiny
+\\
+http://www.greenpeace.org/international/en/multimedia/photos/Deepwater-Horizon---Wellhead/
+\normalsize
+\\
 \hyperlink{Questions}{\beamergotobutton{Questions}}
 \end{frame}
 
@@ -93,10 +99,19 @@
 \begin{frame}{Puget Sound Domain}\label{Puget Sound Domain}
 \begin{figure}
 
-   \includegraphics[width=0.5\linewidth]{domain.png}
+   \includegraphics[width=0.4\linewidth]{domainoutline.png}
 \end{figure}
-
+\hyperlink{Questions}{\beamergotobutton{Questions}}
 \end{frame}
+
+\begin{frame}{Puget Sound Domain Triangularization}\label{Puget Sound Domain Triangularization}
+\begin{figure}
+
+   \includegraphics[width=0.5\linewidth]{mathpointani_img_1.png}
+\end{figure}
+\hyperlink{Questions}{\beamergotobutton{Questions}}
+\end{frame}
+
 
 \section{The Advection-Diffusion Equation, Discretization, and Weak Form} 
 \begin{frame}{The Advection-Diffusion Equation}\label{The Advection-Diffusion Equation}
@@ -109,28 +124,26 @@
 \item $\Delta u \rightarrow$ Diffusivity term
 \item $D \rightarrow$ Coefficient of diffusion
 \item$\underline{v} \cdot \underline{\nabla}u \rightarrow$ Advective term
-\item $f \in L^2{\Omega }\rightarrow$ Forcing function 
+\item $f \in L^{2}\left(\Omega \right)\rightarrow$ Forcing function 
 \end{itemize}
 \hyperlink{Questions}{\beamergotobutton{Questions}}
 \end{frame}
 
 
 \begin{frame}{Implict Euler Step and the Weak Form}  \label{EulerandWeak}
-
+\begin{equation}
+\frac{\partial u}{\partial t}= D\Delta u + \underline{v} \cdot \underline{\nabla}u+f
+\end{equation}
 \begin{itemize}
 \item Implicit in time Euler Step
 \end{itemize}
 \footnotesize
 \begin{equation}
-\frac{U^{n}-U^{n-1}}{dt}=D\Delta U^{n}+\underline{v} \cdot \underline{\nabla}U^{n}
-\end{equation}
-
-\begin{equation}
 U^{n}-dtD\Delta U^{n}-dt\underline{v}\cdot \underline{\nabla}U^{n}=U^{n-1}.
 \end{equation}
 \normalsize
 \begin{itemize}
-\item Deriving the Weak Form
+\item Derive the Weak Form
 \end{itemize}
 \footnotesize
 \begin{equation}
@@ -140,7 +153,6 @@ U^{n}-dtD\Delta U^{n}-dt\underline{v}\cdot \underline{\nabla}U^{n}=U^{n-1}.
 \begin{itemize}
 \item $W \in H^{1}\left({\Omega}\right)$
 \item $\Omega \rightarrow$ Domain
-\item Define $g^{n}=\frac{\partial U^{n}}{\partial n}=0$ where $n$ is the normal to $\Gamma_{N}$
 \end{itemize}
 
 \begin{equation}
@@ -155,7 +167,7 @@ U^{n}-dtD\Delta U^{n}-dt\underline{v}\cdot \underline{\nabla}U^{n}=U^{n-1}.
 \section{Application of the Finite Element Method}
 \begin{frame}{Creation of Basis Functions and Finite Element Discretization} \label{basisfunctionandfinite}
 \begin{itemize}
-\item Define the following basis functions
+\item Define the following
 \end{itemize}
 $$
 \eta_{k}\left(x_{i},y_{j}\right)=\begin{cases}
@@ -165,7 +177,7 @@ $$
 $$
 
 \begin{itemize}
-\item Express $U^{n}$ and $W$ as a linear combination of basis functions
+\item Express $U^{n}$ and $W$ as a linear combinations of basis functions
 \end{itemize}
 
 \begin{eqnarray}\label{UWdiscrete}
@@ -183,17 +195,11 @@ W\left(x,y\right)&=&\sum_{j=1}^{N}\beta_{j}\eta_{j}\left(x,y\right), \texttt{ } 
 \end{frame}
 
 \begin{frame}{Applying the Finite Element Discretizations to the Weak Form} \label{applyingFEMtoweakform}
-\begin{itemize}
-\item Consider again
-\end{itemize}
 \footnotesize
 \begin{equation}
 \int_{\Omega}U^{n}W dx +dtD\alert{\int_{\Omega}\underline{\nabla}W \cdot \underline{\nabla} U^{n} dx}-dt\int_{\Omega}\left(\underline{v}\cdot \underline{\nabla}U^{n}\right)W dx=dtD\int_{\Gamma_{N}}g^{n}W ds+ \int_{\Omega} U^{n-1}W dx.
 \end{equation}
 \normalsize
-\begin{itemize}
-\item Apply F.E.M. to $\int_{\Omega}\underline{\nabla}W \cdot \underline{\nabla} U^{n} dx$
-\end{itemize}
 
 \begin{itemize}
 \item  Substitute in linear combination discretizations for $\underline{\nabla}W$ and $\underline{\nabla}U^{n}$
@@ -203,12 +209,9 @@ W\left(x,y\right)&=&\sum_{j=1}^{N}\beta_{j}\eta_{j}\left(x,y\right), \texttt{ } 
 \sum_{i=1}^{N}\sum_{j=1}^{N} \int_{\Omega} \underline{\nabla}\eta_{j} \xi_{j} \cdot \underline{\nabla}\eta_{i} \beta_{i} dx
 \end{equation}
 
-\begin{itemize}
-\item Triangulate $\Omega$ into a finite set of triangular elements $T$ such that $\Omega = \cup_{T \in T_{\Omega}}$ where $T_{\Omega}$ is the triangularization of $\Omega$
-\end{itemize}
 
 \begin{itemize}
-\item Sum all the contributions from each of the different triangular elements that form each basis function to get
+\item Sum all the contributions from each of the different triangular elements that form each basis function
 \end{itemize}
 
 \begin{equation}
@@ -219,9 +222,7 @@ W\left(x,y\right)&=&\sum_{j=1}^{N}\beta_{j}\eta_{j}\left(x,y\right), \texttt{ } 
 \end{frame}
 
 \begin{frame}{Building the Linear System}\label{BuildLinearSystem}
-\begin{itemize}
-\item Consider the following
-\end{itemize}
+
 \begin{equation}
 \xi_{j}\beta_{i}\alert{\sum_{T \in T_{\Omega}}\int_{T} \underline{\nabla} \eta_{j} \cdot \underline{\nabla}\eta_{i} dx}, \texttt{ } i,j=1,...,N
 \end{equation}
@@ -231,7 +232,7 @@ W\left(x,y\right)&=&\sum_{j=1}^{N}\beta_{j}\eta_{j}\left(x,y\right), \texttt{ } 
 \end{itemize}
 
 \begin{itemize}
-\item We can discretize the rest of the weak form using a similar argument where
+\item Apply similar techniques on the rest of the weak form
 \end{itemize}
 
 \footnotesize
@@ -246,7 +247,7 @@ for $i,j=1,...,N$
 
 \begin{frame}{ Mass Matrices, Right-Hand Side, and the Linear System} \label{MassmatRHSLinearSystem}
 \begin{itemize}
-\item The expressions for $\mathbf{B}$, $\mathbf{C}$, and $\underline{b}$ are as follows (Alberty, Carstensen, Funken)
+\item The expressions for $\mathbf{B}$, $\mathbf{C}$, and $\underline{b}$  (Alberty, Carstensen, Funken)
 \end{itemize}
 
 \begin{equation}
@@ -273,30 +274,27 @@ for $i,j=1,...,N$
 
 \begin{frame} {Computation of $\mathbf{C}$} \label{ComputationofC}
 
-The computational techniques used for $\mathbf{A}$, $\mathbf{B}$, and $\underline{b}$ are covered by Alberty, Carstensen, and Funken
+Computational techniques used for $\mathbf{A}$, $\mathbf{B}$, and $\underline{b}$ are covered in Alberty, Carstensen, and Funken
 \begin{itemize}
-\item We compute $\mathbf{C}$ by first realizing $\underline{v} \cdot \underline{\nabla}\eta_{j}$ is a constant
+\item Compute $\mathbf{C}$ by first realizing $\underline{v} \cdot \underline{\nabla}\eta_{j}$ is a constant
 \end{itemize}
 \begin{equation}
 \mathbf{C}_{i,j} = \underline{v}\cdot \underline{\nabla}\eta_{j}\sum_{T \in T_{\Omega}}\int_{T}\eta_{i} dx.
 \end{equation}
 
 \begin{itemize}
-\item When $N$ is sufficiently large, we use a barycentric approximation of the basis functions
+\item Barycentric approximation of the basis functions when $N$ is large
 \end{itemize}
 
 \begin{equation}
 \mathbf{C}_{i,j} \approx  \frac{\underline{v}\cdot \underline{\nabla}\eta_{j}}{3}\sum_{T \in T_{\Omega}}\int_{T} dx.
 \end{equation}
 
-\begin{itemize}
-\item The integral is just the area of the triangular region that lies flat on the $x$, $y$ plane
-\end{itemize}
 
 \begin{equation}
  \mathbf{C}_{i,j}\approx \frac{\underline{v}\cdot \underline{\nabla}\eta_{j}}{6}\text{det}\left(\begin{bmatrix}x_{2}-x_{1} & x_{3}-x_{1} \\ y_{2}-y_{1} & y_{3}-y_{1} \end{bmatrix}\right).
 \end{equation}
-where the indices should be understood modulo 3
+indices should be understood modulo 3
 
 \hyperlink{Questions}{\beamergotobutton{Questions}}
 \end{frame}
@@ -304,10 +302,10 @@ where the indices should be understood modulo 3
 \section{Navier-Stokes Velocity Vector Field}
 \begin{frame} {Implementation of the Navier-Stokes Equations}\label{NavierStokesSlide}
 
-We will create a finite difference numerical solution to the Navier-Stokes velocity vector field for $\underline{v}$
+Create a finite difference numerical solution to the Navier-Stokes velocity vector field for $\underline{v}$
 
 \begin{itemize}
-\item Consider the following incompressible Navier-Stokes equations
+\item Incompressible Navier-Stokes equations
 \end{itemize}
 
 \begin{equation}
@@ -319,7 +317,7 @@ We will create a finite difference numerical solution to the Navier-Stokes veloc
 \item $\left(\underline{v}\cdot \nabla \right)\underline{v} \rightarrow$ Advective Term
 \item $\nu \Delta \underline{v} \rightarrow$ Viscous term
 \item $\nu \rightarrow$ Kinematic Viscosity
-\item<1-> MacCormack discretization
+\item MacCormack discretization
 \item Boundary construction using a tolerance scheme
 \item Steady state velocity vector field
 \end{itemize}
@@ -408,13 +406,13 @@ $0.001$ and $0.0001$ & $2.8271 \times 10^{-6}$                                  
 \end{itemize}
 
 \begin{figure}   
-\begin{minipage}[b]{0.4\textwidth}
-   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=1\linewidth]{pointconservation.png}
-\caption{Conservation of Concentration of Contaminant}
+\begin{minipage}[b]{0.496\textwidth}
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=1.11\linewidth]{pointconservation.png}
+%\caption{Conservation of Concentration of Contaminant}
 \end{minipage}
- \begin{minipage}[b]{0.4\textwidth}
-   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=1\linewidth]{derivpointconservation.png}
-\caption{Deriviative of Concentration of Contaminant}
+ \begin{minipage}[b]{0.496\textwidth}
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=1.11\linewidth]{derivpointconservation.png}
+%\caption{Deriviative of Concentration of Contaminant}
 \end{minipage}
 \end{figure}
 \hyperlink{Questions}{\beamergotobutton{Questions}}
@@ -427,7 +425,7 @@ $0.001$ and $0.0001$ & $2.8271 \times 10^{-6}$                                  
 \end{itemize}
 
 \begin{figure} 
-\includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.5\linewidth]{constincrease.png}
+\includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=.61\linewidth]{constincrease.png}
 \end{figure}
 \hyperlink{Questions}{\beamergotobutton{Questions}}
 \end{frame}
@@ -449,16 +447,16 @@ $0.001$ and $0.0001$ & $2.8271 \times 10^{-6}$                                  
 \begin{frame}{Graphical Sensitivity} \label{Graphical Sensitivity}
 
 \begin{figure}   
-\begin{minipage}[b]{0.4\textwidth}
-   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=1\linewidth]{sensepoint.png}
+\begin{minipage}[b]{0.496\textwidth}
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=1.1\linewidth]{sensepoint.png}
 \begin{center}
-\caption{Point Source Model Sensitivity}
+%\caption{Point Source Model Sensitivity}
 \end{center}
 \end{minipage}
- \begin{minipage}[b]{0.4\textwidth}
-   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=1\linewidth]{senseconst.png}
+ \begin{minipage}[b]{0.496\textwidth}
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=1.1\linewidth]{senseconst.png}
 \begin{center}
-\caption{Constant Source Model Sensitivity}
+%\caption{Constant Source Model Sensitivity}
 \end{center}
 \end{minipage}
 \end{figure}
@@ -514,6 +512,8 @@ $-10\%$   & $0.0870$              \\ \hline
         %{\bf Questions?}
 \begin{itemize}
 \item \hyperlink{Purpose}{\beamergotobutton{Purpose}}
+\item \hyperlink{Puget Sound Domain}{\beamergotobutton{Puget Sound Domain}}
+%\item \hyperlink{Puget Sound Domain Triangularization}{\beamergotobutton{Puget Sound Domain Triangularization}}
 \item\hyperlink{The Advection-Diffusion Equation}{\beamergotobutton{The Advection-Diffusion Equation}}
 \item \hyperlink{EulerandWeak}{\beamergotobutton{Implict Euler Step and the Weak Form}}
 \item\hyperlink{basisfunctionandfinite}{\beamergotobutton{Creation of Basis Functions and Finite Element Discretization}}

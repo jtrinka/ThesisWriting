@@ -1,0 +1,758 @@
+
+%        File: HW**_Last_First.tex
+%     Created: Fri Aug 07 04:00 PM 2015 M
+% Last Change: Fri Aug 07 04:00 PM 2015 M
+%
+\documentclass[a4paper]{article}
+\usepackage[table]{xcolor}
+\usepackage{amsmath,amsthm,amsfonts}
+\usepackage{tikz,pgfplots}
+\usepackage{graphicx}
+\usepackage[margin=1.75cm]{geometry}
+\usepackage{setspace}
+\usepackage{multirow}
+\usepackage{float}
+\makeatletter
+\newcommand*\bigcdot{\mathpalette\bigcdot@{.5}}
+\newcommand*\bigcdot@[2]{\mathbin{\vcenter{\hbox{\scalebox{#2}{$\m@th#1\bullet$}}}}}
+\makeatother
+
+
+\newcommand\abs[1]{\left|#1\right|}
+\newcommand{\doubleunderline}[1]{\underline{\underline{#1}}}
+\onehalfspacing
+\allowdisplaybreaks
+
+\usepackage[colorlinks]{hyperref}
+
+\theoremstyle{remark}
+\newtheorem*{solution}{Solution}
+
+\theoremstyle{remark}
+\newtheorem*{example}{Example}
+
+
+
+\title{Modeling Contaminant Flow in the Puget Sound\\}
+\author{Jordan Trinka\\
+Advisor: Eric Sullivan Ph.D.}
+\date{\today}
+
+
+\usepackage{fancyhdr}
+ 
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Trinka}
+\lhead{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent In this paper, we mathematically model contaminant flow in a two-dimensional domain of the Puget Sound using a finite element numerical solution to the advection-diffusion equation coupled with a finite difference numerical solution to the Navier-Stokes equations. We offer two models of contaminant flow in this domain, the first will be a Gaussian point source model of contaminant flow. The second model of contaminant flow will utilize a Gaussian point source and a constant boundary source. Figure \ref{abstractimage} shows the result of our second model after $560$ seconds of run time.
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.5\linewidth]{const7.png}
+    \caption{Constant Source Numerical Solution at $t=560$ seconds}
+    \label{abstractimage}
+\end{figure}
+
+\noindent In addition to graphically showing our results, we also provide convergence testing of both our numerical results at the final time step of both our models and find that the numerical results of both our  models are converging to an analytic solution. We also perform a graphical and numerical sensitivity analysis of both our models and find that our numerical solutions to both our models are insensitive to small changes in the diffusivity parameter.
+
+
+
+\end{abstract}
+
+\newpage
+\lhead{Contents}
+\tableofcontents % This line creates the table of contents (DO NOT CHANGE)
+\vspace{0.1in}\hrule
+\newpage
+\lhead{List of Figures and List of Tables}
+\listoffigures
+\listoftables
+\newpage
+\lhead{}
+
+\section{Introduction} \label{intro}
+The Deepwater Horizon spill of April, 2010 was a massive environmental catastrophe. This spill prompted an intense clean up effort by volunteers, government environmental agencies, and the United States Navy. Areas of the Gulf of Mexico that were damaged by the spill needed to be located and cleaned up. Performing a predictive analysis of contaminant spread in the Gulf before a spill like this would help clean-up crews pinpoint what areas would require the most attention in the event that a spill occurs. Using this analysis, clean-up time would be shortened and clean-up cost would be lowered as crews would not have to spend time locating contaminant that has spread throughout the region.
+\par
+\noindent In this paper, we mathematically model the advection and diffusion of a contaminant on the surface of a portion of the Puget Sound by a finite element numerical solution to the advection-diffusion equation in order to predict what areas of an environment would be most damaged by a spill. The advection-diffusion equation requires us to know the velocity vector field of the water when the tide is going out, so, we use a finite difference scheme to solve the Navier-Stokes equations on our domain to provide the velocity field. We use these approximate solutions to create two models of a contaminant spill in the Puget Sound when the tide is going out. One model will consist of a point source model of a sinking ship and the other will model a constant source spill into the domain from a broken pipeline.
+\par
+\noindent We start with an introduction into the finite element method in section \ref{OverviewFEM} by numerically solving a second order, non-homogeneous, ordinary differential equation. We then show our Puget Sound domain in which we wish to model contaminant flow and offer our treatment of boundary conditions for the two models in section \ref{DomainSection}. After this, we discuss our methods used to solve the advection-diffusion equation numerically as well as our Navier-Stokes velocity vector field in sections \ref{AdvecDiffSec} and \ref{Navier-Stokes section}. We then offer our results from our two models in section \ref{Results Section} and perform a sensitivity analysis on both models in section \ref{SensitivityAnalysisSection}. We finish with a discussion of future work in section \ref{futureworksection} and a conclusion in section \ref{conclusionsection}.
+%Discuss what's coming
+
+\section{Overview of the Finite Element Method} \label{OverviewFEM}
+%Talk to Dr. Sullivan
+The purpose of using the finite element method is to approximate the solution to boundary value problems. In particular, the finite element method is often employed to numerically solve partial differential equations on realistic domains where an ``analytic solution is not readily available" \cite{Sullivan}. We summarize a problem that is solved in \cite{Johnson} in order to introduce the reader to the finite element method. All work in the rest of this section is drawn from \cite{Johnson} and \cite{50LinesofMATLAB}. 
+
+\noindent Consider
+\begin{equation}\label{testfem1}
+-u'' \left(x \right)=f\left(x \right)
+\end{equation}
+where $u \in H^{1}\left(\Omega \right)$, $f \in L^{2}\left(\Omega\right)$, $u\left(0 \right) = u\left(1 \right) = 0$ for the domain, $\Omega = 0<x<1$. The space $H^{1}$ is a Sobolev space whose functions and their first derivatives are square-integrable. The $L^{2}$ space is the space of all square-integrable functions \cite{Sullivan}. By integrating twice, we find there is an analytic solution $u(x)$, however, for purposes of this quick overview, we solve \eqref{testfem1} numerically by the finite element method. We start by getting the weak form of \eqref{testfem1} by multiplying both sides by a test function $v\in H^{1}\left(\Omega \right)$ and integrating both sides to get
+
+\begin{equation}\label{testfem2}
+\int_{\Omega} -u'' \left(x \right) v\left(x \right) dx=\int_{\Omega} f\left(x \right) v\left(x \right) dx.
+\end{equation}
+
+\noindent We integrate the left-hand side of \eqref{testfem2} by parts and use the fact that $u\left(0 \right) = u\left(1 \right) = 0$ to get
+
+\begin{equation}\label{testfem3}
+\int_{\Omega} u' \left(x \right) v'\left(x \right) dx=\int_{\Omega} f\left(x \right) v\left(x \right) dx.
+\end{equation}
+
+\noindent Next we create a finite set of nodes $i$ along $\Omega$ which we use to interpolate $u\left(x\right)$, $v\left(x\right)$, and $f\left(x\right)$ at each node $i$. In doing this, we also construct the following set of linear, piecewise-continuous, basis functions where each basis function is centered at a node $i$
+%illustration
+
+$$
+\eta_{i}\left(x \right)=
+\begin{cases}
+\frac{x-x_{i-1}}{x_{i}-x_{i-1}} \text{ for } [x_{i-1},x_{i}] \\
+\frac{x_{i+1}-x}{x_{i+1}-x_{i}} \text{ for } [x_{i},x_{i+1}]
+\end{cases}
+$$
+
+%discuss with Sullivan
+\noindent with $i=1,...,M$ where $M$ is the number of nodes which we specify along $\Omega$. We see that $\eta_{i}\left(x_{i}\right)=1$ and $\eta_{i}\left(x_{i-1}\right)=\eta_{i}\left(x_{i+1}\right)=0$.  From here, we express $u\left(x\right)$ and $v\left(x\right)$ as a finite dimensional linear combination of the basis functions $\eta_{i}$ \cite{Sullivan} as shown below
+\begin{eqnarray}\label{UVdiscrete}
+v\left(x \right) &=& \sum_{i=1}^{M} \beta_{i} \eta_{i}\left(x \right) \text{ for } i=1,...,M\\
+\nonumber
+u\left(x \right) &=& \sum_{j=1}^{M} \xi_{j} \eta_{j}\left(x\right) \text{ for } j=1,...,M
+\end{eqnarray}
+where $x \in [0,1]$, $\beta_{i}=v\left(x_{i}\right)$, and $\xi_{j}=u\left(x_{j}\right)$. Using these interpolations, we see that \eqref{testfem3} becomes
+
+\begin{equation}\label{testfem4}
+\sum_{i=1}^{M}\sum_{j=1}^{M}\xi_{j}\int_{\Omega} \eta_{j}'\eta_{i}'dx=\sum_{i=1}^{M} \int_{\Omega} f\left(x_{i}\right)\eta_{i}dx
+\end{equation}
+
+\noindent This is a linear system of the form 
+\begin{equation}\label{testfem5}
+\mathbf{A}\underline{\xi}=\underline{b}.
+\end{equation}
+
+\noindent where we define the stiffness matrix, $\mathbf{A}$, as $\mathbf{A}_{i,j}=\sum_{i=1}^{M}\int_{\Omega} \eta_{i}'\eta_{j}'dx$ and right-hand side, $\underline{b}$, as $\underline{b}_{i}=\sum_{i=1}^{M} \int_{\Omega} f\left(x_{i}\right)\eta_{i}dx \text{ for } j=1,...,M$.
+We compute the elements $\mathbf{A}$ by first noticing that $\eta_{i}'\eta_{j}'=0$ if $\abs{i-j}>1 \text{ } \forall \texttt{ } x\in [0,1]$. This fact causes $\mathbf{A}$ to be tri-diagonal. For this particular example, we partition our domain uniformly with $h_{j}=\frac{1}{M+1}$. To calculate the main diagonal of $\mathbf{A}$ we calculate
+
+\begin{equation} \label{testfem6}
+\int_{\Omega} \eta_{j}'\eta_{j}'dx=\int_{x_{j-1}}^{x_{j}} \frac{1}{h_{j}^{2}}dx+\int_{x_{j}}^{x_{j+1}} \frac{1}{h_{j+1}^{2}}dx = \frac{1}{h_{j}}+\frac{1}{h_{j+1}} 
+\end{equation}
+
+\noindent for $j=1,...,M$.
+
+\noindent For the other diagonals, we have
+
+\begin{equation}
+\int_{\Omega} \eta_{j}'\eta_{j-1}'dx=\int_{\Omega} \eta_{j-1}'\eta_{j}'dx=-\int_{x_{j-1}}^{x_{j}} \frac{1}{h_{j}^{2}}dx=-\frac{1}{h_{j}} 
+\end{equation}
+
+\noindent for $j=2,...,M$.
+
+\noindent So now \eqref{testfem5} becomes
+%Talk to Sullivan
+\begin{equation}\label{testfem7}
+\frac{1}{h}\begin{bmatrix}
+2 & -1 & 0 & \dots & 0\\
+-1 & 2 & -1 & \ddots & \vdots \\ 
+0 & -1 & 2 & \ddots & \vdots \\
+\vdots & \ddots & \ddots & \ddots & -1\\
+0 & \dots & \dots & -1 & 2
+
+\end{bmatrix}
+\begin{bmatrix}
+\xi_{1}\\
+\vdots \\
+\vdots \\
+\vdots \\
+\xi_{M}
+\end{bmatrix}
+=
+\begin{bmatrix}
+b_{1}\\
+\vdots \\
+\vdots \\
+\vdots \\
+b_{M}
+\end{bmatrix}
+\end{equation}
+
+\noindent We use row reduction to solve \eqref{testfem7} for $\underline{\xi}$. Now that we have an idea of how the finite element method works, we continue into our particular problem.
+
+\section{Puget Sound Domain, Boundary, and Initial Conditions} \label{DomainSection}
+We start with our Puget Sound domain $\Omega \subset \mathbb{R}^{2}$ where $\Omega$ is a bounded Lipschitz domain that also has a polygonal boundary $\Gamma$ \cite{50LinesofMATLAB}. Our domain is shown in Figure \ref{pugetsounddomain} outlined in black and red.
+\begin{figure}[H]\label{MyDomain}
+   
+\centering   
+   \includegraphics[width=0.4\linewidth]{domainoutline.png}
+    \caption{Puget Sound Domain}
+    \label{pugetsounddomain}
+    %left lower right upper
+\end{figure}
+
+\noindent We apply Neumann boundary conditions, $\Gamma_{\text{N}}$, along the boundary outlined in black while the red outlined boundary will be Dirichlet, $\Gamma_{\text{D}}$, such that $\Gamma = \Gamma_{\text{N}} \cup \Gamma_{\text{D}}$. We create two models of contaminant flow within the domain. The first model utilizes an arbitrarily chosen point source Gaussian initial condition of contaminant with the function value along the Dirichlet boundary being set to $0$. We also set the function value along the Neumann boundary to be $0$. The second model utilizes two sources of contaminant. The first source being a point source Gaussian initial condition of contaminant and the second being a constant source of contaminant along part of the shoreline in order to model a constant spill into $\Omega$. In order to model the spill on the shoreline, we choose to make an arbitrarily chosen portion of the Neumann boundary found in Figure \ref{pugetsounddomain}, Dirichlet, with a function value that is nonzero. We choose the function value along this portion of the Dirichlet boundary on the shoreline to be close in value to that of the peak of the Gaussian initial condition. The function value along the remaining Dirichlet boundary and the remaining Neumann boundary is set to $0$. We start this Gaussian initial condition so that the peak of the Gaussian is close to the shoreline boundary where the constant spill occurs. This new boundary condition is outlined in magenta in Figure \ref{pugetsounddomain2}
+
+\begin{figure}[H]\label{MyDomain}
+   
+\centering   
+   \includegraphics[width=0.4\linewidth]{domainoutline2.png}
+    \caption{Puget Sound Domain with Non-Homogenous Dirichlet Conditions}
+    \label{pugetsounddomain2}
+    %left lower right upper
+\end{figure}
+
+\section{The Advection-Diffusion Equation} \label{AdvecDiffSec}
+%Explain the advection diffusion equation here
+Consider the advection-diffusion equation
+\begin{equation} \label{advecdiff}
+\frac{\partial u}{\partial t} = D\Delta u + \underline{v} \bigcdot \underline{\nabla}u+f
+\end{equation}
+where $u\in H^{1}\left(\Omega\right)$, the components of $\underline{v}$ are in $H^{1}\left(\Omega\right)$,  $f \in L^{2}\left(\Omega\right)$,  $\Delta$ is the Laplace operator, and $D$ is the coefficient of diffusivity \cite{Sullivan}.
+We see that the left-hand side of \eqref{advecdiff} is the change in concentration of contaminant with respect to time, $\Delta u$ models the diffusion of contaminant, $\underline{v} \bigcdot \underline{\nabla}u$ models the advection of contaminant, and $f$ is a forcing term.
+For purposes of this project, we take $u$ to be concentration of contaminant measured in kg per square meter, $t$ is time measured in seconds, $D$ is the diffusivity constant measured in square meters per second,
+$\underline{v}$ is the velocity vector field whose components are measured in meters per second, and $f=0$. From here we begin our discretization in order to allow us to apply the finite element method to \eqref{advecdiff}. 
+
+\subsection{Implicit in Time Euler Discretization} \label{impliciteulersec}
+
+%Take D to be something and then state what you're using for D later. Walk the person through the Advection-Diffusion equation such that a layman and a complex mathematical reader could understand. Choose to solve numerically since there is no known analytic solution on domain.
+Building off of ideas in \cite{50LinesofMATLAB}, we discretize \eqref{advecdiff}, in time, with an implicit Euler step to get 
+\begin{equation} \label{euleradvecdiff}
+\frac{U^{n}-U^{n-1}}{dt}=D\Delta U^{n}+\underline{v} \bigcdot \underline{\nabla}U^{n}
+\end{equation}
+where $dt$ is our time-step and $U^{n}$ is the numerical solution to $u$ at time-step $n$. Notice we do not include $\underline{v}$ in our discretization since we instead numerically solve for the steady state velocity field before we numerically solve the advection-diffusion equation. We now rearrange \eqref{euleradvecdiff} to obtain
+
+\begin{equation} \label{rearrangeeuleradvecdiff}
+U^{n}-dtD\Delta U^{n}-dt\underline{v}\bigcdot \underline{\nabla}U^{n}=U^{n-1}.
+\end{equation}
+Using \eqref{rearrangeeuleradvecdiff}, we now build the weak form for the finite element method.
+
+\subsection{Weak Form} \label{weakformsec}
+We find the weak form of \eqref{rearrangeeuleradvecdiff} by multiplying both sides by a test function $W \in H^{1}\left(\Omega\right)$ and integrating both sides to get
+
+\begin{equation} \label{Weak Formone}
+\int_{\Omega}U^{n}W dx -dtD \int_{\Omega}\Delta U^{n}W dx-dt\int_{\Omega}\left(\underline{v}\bigcdot \underline{\nabla}U^{n}\right)W dx=\int_{\Omega} U^{n-1}W dx
+\end{equation}
+where $dx$ denotes the element of area in $\mathbb{R}^{2}$. We integrate $\int_{\Omega}\Delta U^{n}W$ by parts and we define $g=\frac{\partial u}{\partial m}=0$ along the Neumann boundary where $m$ is normal to $\Gamma_{\text{N}}$ to obtain
+
+\begin{equation} \label{Weak Formtwo}
+\int_{\Omega}U^{n}W dx -dtD \left(\int_{\Gamma_{\text{N}}}g^{n}W ds -\int_{\Omega}\underline{\nabla}W \bigcdot \underline{\nabla} U^{n} dx \right)-dt\int_{\Omega}\left(\underline{v}\bigcdot \underline{\nabla}U^{n}\right)W dx=\int_{\Omega} U^{n-1}W dx
+\end{equation}
+where $ds=\underline{m} dx$. We rearrange \eqref{Weak Formtwo} to get
+
+\begin{equation} \label{Weak Formthree}
+\int_{\Omega}U^{n}W dx +dtD\int_{\Omega}\underline{\nabla}W \bigcdot \underline{\nabla} U^{n} dx-dt\int_{\Omega}\left(\underline{v}\bigcdot \underline{\nabla}U^{n}\right)W dx=dtD\int_{\Gamma_{\text{N}}}g^{n}W ds+\int_{\Omega} U^{n-1}W dx.
+\end{equation}
+
+\noindent We now apply the finite element method to approximate $U^{n}$ and $W$ as linear combinations of basis functions.
+
+
+\subsection{Applying the Finite Element Method} \label{applyFEMsec}
+We start by creating a triangularization of $\Omega$, $T_{\Omega}$, by dividing the domain up into a finite set of triangular elements, $T$. We create this triangularization such that no edge of each $T \in T_{\Omega}$ crosses the edge of another triangular element and the elements are made up of three nodes in our domain. We then extend ideas covered in section \ref{OverviewFEM} and we create a finite set of two variable,  piecewise-continuous, linear, basis functions centered at each node $k$ such that
+
+$$
+\eta_{k}\left(x_{i},y_{i}\right)=\begin{cases}
+1 \texttt{ if } i=k\\
+0 \texttt{ if } i\neq k \texttt{ for } i,k=1,...,N
+\end{cases} 
+$$
+where $N$ number of nodes that we specify in our domain $\Omega$.
+
+\noindent We now continue our extension of ideas covered in \ref{OverviewFEM} and express $W$ and $U^{n}$ as a linear combination of basis functions multiplied by a finite approximation of $W$ and $U^{n}$ at some node $k=1,...,N$ to obtain the following
+
+\begin{eqnarray}\label{UWdiscrete}
+W\left(x,y\right)&=&\sum_{i=1}^{N}\beta_{i}\eta_{i}\left(x,y\right), \texttt{ } x,y \in \Omega,\text{ for } i=1,...,N\\
+\nonumber
+U^{n}\left(x,y\right)&=&\sum_{j=1}^{N}\xi_{j}\eta_{j}\left(x,y\right), \texttt{ } x,y \in \Omega, \text{ for } j=1,...,N
+\end{eqnarray}
+where $\beta_{i}=W\left(x_{i},y_{i}\right)$ and $\xi_{j}=U^{n}\left(x_{j},y_{j}\right)$. Consider the term $\int_{\Omega}\underline{\nabla}W \bigcdot \underline{\nabla} U^{n}dx$ from $\eqref{Weak Formthree}$. If we substitute in our linear combinations, we obtain the following
+
+\begin{equation}\label{subsinto}
+\int_{\Omega}\underline{\nabla}W \bigcdot \underline{\nabla} U^{n}dx = \sum_{i=1}^{N} \sum_{j=1}^{N} \int_{\Omega} \underline{\nabla}\eta_{j} \xi_{j} \bigcdot \underline{\nabla}\eta_{i} \beta_{i} dx = \sum_{i=1}^{N} \sum_{j=1}^{N} \xi_{j} \beta_{i} \int_{\Omega}\underline{\nabla}\eta_{j} \bigcdot \underline{\nabla}\eta_{i} dx
+\end{equation}
+
+\noindent In order to compute $\int_{\Omega}\underline{\nabla}\eta_{j} \bigcdot \underline{\nabla}\eta_{i} dx$ we sum the contributions from the different triangular elements that make up each basis function. When we do this we obtain
+
+\begin{equation}\label{anothersubstitution}
+ \xi_{j}\beta_{i}\sum_{T \in T_{\Omega}}\int_{T} \underline{\nabla} \eta_{j} \bigcdot \underline{\nabla}\eta_{i} dx, \texttt{ } i,j=1,...,N.
+\end{equation}
+
+
+\noindent Therefore, we create a stiffness matrix $\mathbf{A}$ that is as follows
+
+\begin{equation}\label{MatrixA}
+\mathbf{A}_{i,j}=\sum_{T\in T_{\Omega}}\int_{T} \underline{\nabla}\eta_{j} \bigcdot \underline{\nabla}\eta_{i} dx, \text{ } i,j=1,...,N.
+\end{equation}
+
+
+\noindent We also express $\int_{\Omega}U^{n}W dx$ and $\int_{\Omega}\left(\underline{v} \bigcdot \underline{\nabla}U^{n}\right)W dx$ from \eqref{Weak Formthree} as linear combinations of basis functions and their respective weights. We do this by substituting in the discretizations of $U^{n}$ and $W$ found in \eqref{UWdiscrete} for $U^{n}$ and $W$ in the terms described in the previous sentence. We sum the contributions from the different triangular elements that make up each basis function to get the following expressions
+\begin{equation}\label{subsintoB}
+\int_{\Omega}U^{n}W dx = \sum_{i=1}^{N} \sum_{j=1}^{N} \int_{\Omega} \eta_{j} \xi_{j} \eta_{i} \beta_{i} dx = \xi_{j} \beta_{i} \sum_{T \in T_{\Omega}}\int_{T}\eta_{j}\eta_{i} dx, \text{ } i,j=1,...,N.
+\end{equation}
+
+\begin{equation}\label{subsintoC}
+\int_{\Omega}\left(\underline{v} \bigcdot \underline{\nabla}U^{n}\right)W dx = \sum_{i=1}^{N} \sum_{j=1}^{N} \int_{\Omega} \left(\underline{v} \bigcdot \underline{\nabla}\eta_{j} \xi_{j}\right) \eta_{i} \beta_{i} dx =  \xi_{j} \beta_{i} \sum_{T \in T_{\Omega}}\int_{T}\left(\underline{v} \bigcdot \underline{\nabla}\eta_{j}\right)\eta_{i} dx, \text{ } i,j=1,...,N.
+\end{equation}
+
+
+
+\noindent Therefore, we obtain the following mass matrices $\mathbf{B}$ and $\mathbf{C}$
+
+\begin{equation}\label{MatrixB}
+\mathbf{B}_{i,j} = \sum_{T \in T_{\Omega}} \int_{T} \eta_{j}\eta_{i} dx, \text{ } i,j=1,...,N.
+\end{equation}
+
+
+\begin{equation}\label{MatrixC}
+\mathbf{C}_{i,j} = \sum_{T \in T_{\Omega}}\int_{T}\left(\underline{v}\bigcdot \underline{\nabla}\eta_{j}\right)\eta_{i} dx, \text{ } i,j=1,...,N.
+\end{equation}
+
+
+
+\noindent For the right-hand side of \eqref{Weak Formthree}, we begin with 
+
+\begin{equation}\label{RHSstart}
+Ddt\int_{\Gamma_{\text{N}}}g^{n}W ds+\int_{\Omega} U^{n-1}W dx
+\end{equation}
+
+\noindent Applying \eqref{UWdiscrete}, we get
+
+\begin{equation}\label{RHSsubs}
+Ddt\sum_{i=1}^{N}\sum_{j=1}^{N} \int_{\Gamma_{\text{N}}}g^{n}\beta_{i}\eta_{i} ds + \int_{\Omega}\xi_{j}^{n-1}\eta_{j}\beta_{i}\eta_{i}dx
+\end{equation}
+where $\xi_{j}^{n-1}= U^{n-1}\left(x_{j},y_{j}\right)$. We sum over the boundary contributions of each triangular element boundary on $\Gamma_{\text{N}}$ and we sum the contributions of each triangular element for our non-boundary term to get
+
+\begin{equation}\label{RHSsumtri}
+\left(\sum_{E\in \Gamma_{\text{N}}}Ddt\int_{E}g^{n}\eta_{i}ds+\xi_{j}^{n-1}\sum_{T \in T_{\Omega}}\int_{T}\eta_{j}\eta_{i}dx\right)\beta_{i},\texttt{ } i,j=1,...,N
+\end{equation}
+
+\noindent where $E$ is an edge of $\Gamma_{\text{N}}$. Substituting in $\mathbf{B}$ for $\sum_{T \in T_{\Omega}}\int_{T}\eta_{j}\eta_{i}dx$ gives us
+
+\begin{equation}
+\left(\sum_{E\in \Gamma_{\text{N}}}Ddt\int_{E}g^{n}\eta_{i}ds+\mathbf{B}_{i,j}\xi_{j}^{n-1}\right)\beta_{i}, \texttt{ } i,j=1,...,N.
+\end{equation}
+
+
+\noindent Therefore, we will define our right-hand side, $\underline{b}$, as
+\begin{equation}\label{bvec}
+\underline{b}_{j}=\sum_{E \in \Gamma_{\text{N}}} Ddt\int_{E}g\eta_{j}ds+\mathbf{B}_{i,j}\xi_{j}^{n-1}, \texttt{ } i,j=1,...,N.
+\end{equation}
+ 
+\noindent We now use our mass matrices and right hand side to rewrite \eqref{Weak Formthree} in our discretized, finite element form as follows
+
+\begin{equation} \label{massmatricesnoC}
+\left(\underline{\xi}^{n}\underline{\beta}^{n}\mathbf{B}+\underline{\xi}^{n}\underline{\beta}^{n}dtD\mathbf{A}-\underline{\xi}^{n}\underline{\beta}^{n}dt\mathbf{C}\right)=\underline{b}^{n}\underline{\beta}^{n}.
+\end{equation}
+
+\noindent This simplifies to 
+
+\begin{equation} \label{Final Linear System}
+\left(\mathbf{B}+dtD\mathbf{A}-dt\mathbf{C}\right)\underline{\xi}^{n}=\underline{b}^{n}.
+\end{equation}
+
+
+\noindent The mathematical and coding techniques used to construct $\mathbf{A}$, $\mathbf{B}$, and $\underline{b}$ are covered in \cite{50LinesofMATLAB}. This resource takes care of the diffusive term and offers a treatment of the Neumann and Dirichlet boundary conditions. We now derive our own computation techniques for $\mathbf{C}$ as inspired by \cite{50LinesofMATLAB} which is used to compute the advection term. We start with \eqref{MatrixC}. Since each basis function is piecewise-continuous and linear, then $\underline{\nabla}\eta_{i}(x,y)$ is a constant gradient vector of the form
+
+\begin{equation}\label{gradeta}
+\underline{\nabla}\eta_{i}=\left(C_{1}\hat{i}+C_{2}\hat{j}\right), \text{ } i=1,...,N
+\end{equation}
+
+\noindent where $C_{1}$ and $C_{2}$ are constants. Since we are using a steady state solution of the Navier-Stokes equations at each node, we state that
+
+\begin{equation}\label{velocityterm}
+\underline{v}_{i}=\left(v_{i_{1}}\hat{i}+v_{i_{2}}\hat{j}\right), \text{ } i=1,...,N
+\end{equation}
+
+\noindent where $v_{i_{1}}$ is the velocity in the $\hat{i}$ direction at node $i$ and $v_{i_{2}}$ is the velocity in the $\hat{j}$ direction at node $i$. We use a tolerance scheme that will ensure that each node $i$ in our finite element mesh will have some $\underline{v}_{i}$ associated with it. So, define $R$ as the set of nodes in our finite element mesh and $S$ as the set of nodes in our finite difference code. Define $i_{x}$, $\kappa_{x}$, $i_{y}$, and $\kappa_{y}$ as being the x,y coordinate pairs for nodes $i \in R$ and $\kappa \in S$ respectively. Next we create an $\epsilon$ tolerance scheme such that if $i \in R$ and $\kappa \in S$ are close in $x$ and $y$ value, then we assign $i$ the velocity of $\kappa$. Mathematically, this means we choose an $\epsilon$ such that if $\abs{i_{x}-\kappa_{x}}\leq \epsilon$ and $\abs{i_{y}-\kappa_{y}}\leq \epsilon$, then $\underline{v}_{i}=\underline{v}_{\kappa}$. In order to ensure that each node $i \in R$ has some sort of velocity associated with it, we utilize a very fine finite difference mesh. This allows us to choose $\epsilon$ as small so that the velocity assigned to each node $i \in R$ is close to the velocity of the nodes $\kappa \in S$ that would surround $i$ if $i$ was present in $S$. Using this technique, we rewrite \eqref{MatrixC} as
+
+\begin{equation}\label{MatrixCagain}
+\mathbf{C}_{i,j} = \sum_{T \in T_{\Omega}}\underline{v}\bigcdot \underline{\nabla}\eta_{j}\int_{T}\eta_{i} dx, \text{ } i,j=1,...,N.
+\end{equation}
+The integration of each basis function in \eqref{MatrixCagain} can be particularly cumbersome to code so we devise a barycentric approximation of the basis functions which allows us to avoid the integrations. Realize that for very fine triangular meshes where $R$ has a sufficiently large number of nodes, the barycentric average of each element that makes up each basis function is close in $x$ and $y$ value to the $x$ and $y$ values of the nodes that make up each triangular element. So let $x_{\text{bc}},y_{\text{bc}}$ denote the barycentric average of a triangular element that makes up each basis function. We create a fine mesh in our finite element code and evaluate each basis function element at the barycenter and use this as our approximation of the basis function in order to get
+
+
+\begin{equation}\label{approximatebasiswithsource}
+\eta_{i} \left(x,y\right) \approx \eta_{i} \left(x_{\text{bc}},y_{\text{bc}}\right) = \frac{1}{3}, \text{ } i=1,...,N
+\end{equation}
+
+
+\noindent So now \eqref{MatrixCagain} becomes
+
+\begin{equation}\label{MatrixCagainsimpleint}
+\mathbf{C}_{i,j} = \sum_{T \in T_{\Omega}} \frac{\underline{v}\bigcdot \underline{\nabla}\eta_{j}}{3} \int_{T} dx, \texttt{ } i,j=1,...,N.
+\end{equation}
+
+\noindent From here $\int_{T} dx$ is just the area formed by each triangular region, $A$, which by \cite{50LinesofMATLAB} is given as
+
+\begin{equation}\label{areadeterminant}
+A=\frac{1}{2}\text{det}\left(\begin{bmatrix}x_{2}-x_{1} & x_{3}-x_{1} \\ y_{2}-y_{1} & y_{3}-y_{1} \end{bmatrix}\right).
+\end{equation}
+
+\noindent Therefore, we can now rewrite \eqref{MatrixC} as being approximated by the following expression
+
+\begin{equation}\label{intequality}
+ \mathbf{C}_{i,j}=\sum_{T \in T_{\Omega}}\int_{T}\left(\underline{v}\bigcdot \underline{\nabla}\eta_{j}\right)\eta_{i} dx \approx \sum_{T \in T_{\Omega}} \frac{\underline{v}\bigcdot \underline{\nabla}\eta_{j}}{6}\text{det}\left(\begin{bmatrix}x_{2}-x_{1} & x_{3}-x_{1} \\ y_{2}-y_{1} & y_{3}-y_{1} \end{bmatrix}\right), \texttt{ } i,j=1,...,N.
+\end{equation}
+
+\section{Navier-Stokes Velocity Vector Field} \label{Navier-Stokes section}
+To build our velocity vector field, we utilize a finite difference numerical solution to the incompressible Navier-Stokes equations without internal or external forces
+
+\begin{equation}\label{navierstokes}
+\frac{\partial \underline{v}}{\partial t}+\left(\underline{v}\bigcdot \nabla \right)\underline{v}-\nu \Delta \underline{v} = \underline{0}.
+\end{equation}
+%nu measured in square meters per second
+
+\par
+\noindent In \eqref{navierstokes}, $\frac{\partial \underline{v}}{\partial t}$ is the change in velocity with respect to time, $\left(\underline{v}\bigcdot \nabla \right)\underline{v}$ is the advective term, and $\nu \Delta \underline{v}$ is the viscous term which models diffusion of velocity through the fluid. For this project, we will take the components of $\underline{v}$ to be measured in meters per second, $t$ is measured in seconds, and $\nu$ is the kinematic velocity measured in square meters per second. We now discuss our numerical solution to \eqref{navierstokes}.
+
+\subsection{Initial Conditions and Treatment of Boundaries} \label{Navier-Stokes Initial Conditions and Boundaries Section}
+To begin, we create the initial condition for our velocity vector field as seen in Figure \ref{navierstokesinitialcondition} which shows velocity vector field arrows pointing out into the greater Puget Sound. This initial condition is used to build the steady-state velocity field of the Sound when the tide is going out.
+
+\begin{figure}[H]  
+\centering   
+   \includegraphics[width=0.4\linewidth]{initialcondnavierstokes.png}
+    \caption{Initial Condition for the Navier-Stokes Equations}
+    \label{navierstokesinitialcondition}
+    %left lower right upper
+\end{figure}
+
+%picture here of initial condition
+\noindent The magnitude of each velocity vector at each node $\kappa$ that was chosen in our initial condition shown in Figure \ref{navierstokesinitialcondition} is $3$ meters per second which was chosen arbitrarily. We should also note that the vectors in Figure \ref{navierstokesinitialcondition} point at $45$ degree angles as measured from the horizontal axis. Since water from the Puget Sound doesn't travel over land, we implement homogeneous Dirichlet conditions along the black boundary shown in Figure \ref{pugetsounddomain} for our finite difference numerical solution to the Navier-Stokes equations. We do this by connecting the boundaries formed in our finite element code to our finite difference code. So, we create a tolerance scheme where if the nodes of our finite element mesh that are on our Neumann boundary are close in $x$ and $y$ value to the $x$ and $y$ value of the nodes in our finite difference mesh, then we enforce Dirichlet boundary conditions along those finite difference code nodes. Mathematically, we begin by defining $i_{\text{N}} \in R$ to be the nodes that connect the edges that form $\Gamma_{\text{N}}$ in our finite element code. Now define $i_{\text{N}_{x}}$, $\kappa_{x}$, $i_{\text{N}_{y}}$, $\kappa_{y}$ as the $x$ and $y$ coordinates of nodes $i_{\text{N}} \in R$ and $\kappa \in S$ respectively. If $\abs{i_{\text{N}_{x}} - \kappa_{x}} < \epsilon$ and $\abs{i_{\text{N}_{y}} - \kappa_{y}} < \epsilon$ for some chosen $\epsilon$, then the velocity vector at node $\kappa$ is set to $\underline{0}$. We choose $\epsilon$ arbitrarily such that we don't zero out too many nodes of our finite difference code but also so that we form boundaries along our shoreline. We now develop a finite difference method to approximate the solution to \eqref{navierstokes} at our interior nodes.
+
+
+\subsection{MacCormack Discretization} \label{MacCormack Section}
+We use a MacCormack discretization to find the numerical solution to \eqref{navierstokes}. This method uses implicit and explicit Euler steps and takes the average. The MacCormack discretization is a second order accurate method and helps resolve stability issues that might arise with numerical solutions. We begin with the following explicit Euler approximation of the Navier-Stokes equations
+
+\begin{eqnarray}
+\frac{\partial v^{f}_{1_{i,j}}}{\partial t} \approx-v^{n}_{1_{i,j}}\frac{\left(v^{n}_{1_{i+1,j}}-v^{n}_{1_{i,j}}\right)}{dx_{FD}}-v^{n}_{2_{i,j}}\frac{\left(v^{n}_{1_{i,j+1}}-v^{n}_{1_{i,j}}\right)}{dy_{FD}}+\nu\Delta v^{n}_{1_{CD}}\\
+\nonumber
+\frac{\partial v^{f}_{2_{i,j}}}{\partial t} \approx -v^{n}_{1_{i,j}}\frac{\left(v^{n}_{2_{i+1,j}}-v^{n}_{2_{i,j}}\right)}{dx_{FD}}-v^{n}_{2_{i,j}}\frac{\left(v^{n}_{2_{i,j+1}}-v^{n}_{2_{i,j}}\right)}{dy_{FD}}+\nu\Delta v^{n}_{2_{CD}}\\
+\nonumber
+\end{eqnarray}
+
+\noindent where $v^{f}_{k_{i,j}}$ denotes the first approximation of the $k$th component of $\underline{v}$ with $k=\{1,2\}$ at spatial nodes $i$, $j$. We also have that $v^{n}_{k_{i,j}}$ is the velocity of the $k$th component of $\underline{v}$ at time-step $n$, $\Delta v^{n}_{k_{CD}}$ is the centered-difference approximation to the Laplacian of the $k$th component of $\underline{v}$ at time step $n$, and $dx_{FD}$, $dy_{FD}$ are the spatial steps of our finite difference method in the $x$ and $y$ directions respectively. We now calculate our predictive step, $v^{p}_{k_{i,j}}$, with the following
+
+
+\begin{equation}\label{predictive}
+v^{p}_{k_{i,j}}=v^{n}_{k_{i,j}}+\frac{\partial v^{f}_{k_{i,j}}}{\partial t}dt_{FD}
+\end{equation}
+where $dt_{FD}$ is the time-step of our finite difference method. Using this predictive step, we now calculate our second approximations to \eqref{navierstokes}, $\frac{\partial v^{s}_{k_{i,j}}}{\partial t}$, with the following
+
+\begin{eqnarray}
+\frac{\partial v^{s}_{1_{i,j}}}{\partial t} \approx \left(-v^{f}_{1_{i,j}}\frac{\left(v^{f}_{1_{i,j}}-v^{f}_{1_{i-1,j}}\right)}{dx_{FD}}-v^{f}_{2_{i,j}}\frac{\left(v^{f}_{1_{i,j}}-v^{f}_{1_{i,j-1}}\right)}{dy_{FD}}+\nu\Delta v^{f}_{1_{CD}}\right)\\
+\nonumber
+\frac{\partial v^{s}_{2_{i,j}}}{\partial t} \approx \left(-v^{f}_{1_{i,j}}\frac{\left(v^{f}_{2_{i,j}}-v^{f}_{2_{i-1,j}}\right)}{dx_{FD}}-v^{f}_{2_{i,j}}\frac{\left(v^{n}_{2_{i,j}}-v^{f}_{2_{i,j-1}}\right)}{dy_{FD}}+\nu\Delta v^{f}_{2_{CD}}\right).\\
+\nonumber
+\end{eqnarray}
+Using this second approximation to \eqref{navierstokes}, we now calculate our next time-step approximations, $v^{n+1}_{k_{i,j}}$, with
+
+\begin{equation}\label{fullstep}
+v^{n+1}_{k_{i,j}}=v^{n}_{k_{i,j}}+\left(\frac{\partial v^{f}_{k_{i,j}}}{\partial t}+\frac{\partial v^{s}_{k_{i,j}}}{\partial t}\right)\frac{dt_{FD}}{2}.
+\end{equation}
+
+\noindent Using this MacCormack method, we run our code until we obtain the steady state of $\underline{v}$ which can be found in Figure \ref{navierstokessteadystate} which shows how the contaminant will travel within our domain while the tide is going out.
+
+%figure of steady state here
+\begin{figure}[H]  
+\centering   
+   \includegraphics[width=0.4\linewidth]{navierstokessteadystate.png}
+    \caption{Steady State Solution to the Navier-Stokes Equations}
+    \label{navierstokessteadystate}
+    %left lower right upper
+\end{figure}
+
+\noindent Figure \ref{navierstokessteadystate} shows velocity field vectors traveling out towards the greater Puget Sound. We see that our tolerance scheme has failed in the upper left-hand corner of Figure \ref{navierstokessteadystate} which is indicated by velocity field arrows breaking through that boundary due to the lack of Neumann boundary nodes in our finite element code. We also see velocity field arrows breaking through our shoreline boundary in the lower left-hand corner of Figure \ref{navierstokessteadystate}. We would fix this issue by either slightly increasing $\epsilon$ or increasing the number of Neumann boundary nodes in our finite element code along that portion of our domain.
+
+
+\section{Results} \label{Results Section}
+%Explain running two models
+Using our finite element and finite difference methods, we build our solutions. We multiply each term in our velocity vector field by $\frac{1}{10}$ for stability reasons with $\frac{1}{10}$ being chosen as an arbitrary. We also choose a diffusion coefficient of $1$ for stability reasons with $1$ also being chosen arbitrarily.
+
+\subsection{Point Source Model}
+We begin with modeling point source contaminant flow in our domain shown in Figure \ref{pugetsounddomain} which will model a sinking ship. The following series of snap-shots show the progression of contaminant flow at different times $t$
+
+\begin{figure}[H]
+   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{point1.png}
+    \caption{Point Source Numerical Solution at time $t = 0.2$ seconds}
+    \label{Results.2secondspoint}
+\end{figure}
+
+\begin{figure}[H]
+   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{point2.png}
+    \caption{Point Source Numerical Solution at time $t = 50$ seconds}
+    \label{Results50secondspoint}
+\end{figure}
+
+\begin{figure}[H]
+   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{point3.png}
+    \caption{Point Source Numerical Solution at time $t = 100$ seconds}
+    \label{Results100secondspoint}
+\end{figure}
+
+\begin{figure}[H]
+   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{point4.png}
+    \caption{Point Source Numerical Solution at time $t = 200$ seconds}
+    \label{Results200secondspoint}
+\end{figure}
+
+\begin{figure}[H]
+\centering   
+  \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{point5.png}
+   \caption{Point Source Numerical Solution at time $t = 230$ seconds}
+   \label{Results230secondspoint}
+\end{figure}
+
+
+\noindent In order to confirm our numerical results we test for the convergence of our numerical solution as well as conservation of concentration since we are not adding or subtracting any contaminant in this first model.
+
+
+\subsection{Convergence Testing for Point Source Model} \label{ConvergencePointModelSection}
+We perform convergence testing to see if our numerical solution will eventually converge to the analytic solution as we decrease $dt$. So, we run our point source model code for a $230$ seconds of simulated time and then save the resulting final numerical solution into a vector. We do this starting with $dt=0.1$ and then we decrease $dt$ by a factor of $10$ each time we run the code and save the final result. We then measure the Euclidean distance between final result vectors as expressed by
+
+\begin{equation} \label{convergencetest}
+\Vert \underline{U}^{end}_{dt_{1}}-\underline{U}^{end}_{dt_{2}} \Vert
+\end{equation}
+
+\noindent where $\underline{U}^{end}_{dt_{1}}$ is the numerical solution at the final time step of $t=230$ seconds found using a time-step of $dt_{1}$. We also note that $\underline{U}^{end}_{dt_{2}}$ uses a time-step of $dt_{2}$ which is $10$ times smaller than $dt_{1}$. Our solution converges, if each time we decrease $dt$ by a factor of $10$, then the Euclidean distance between numerical solutions at the final time-step should decrease by a factor of $10$ as well. When we test this, we obtain Table \ref{convergencemodelpoint}.
+
+\begin{table}[H]
+\centering
+\caption{Convergence Testing for Point Source Model}
+\label{convergencemodelpoint}
+\begin{tabular}{|l|l|}
+\hline
+Time-Steps           & Euclidean Distance Between Numerical Solutions \\ \hline
+$0.1$ and $0.01$     & $3.3623 \times 10^{-4}$              \\ \hline
+$0.01$ and $0.001$   & $3.3656 \times 10^{-5}$              \\ \hline
+$0.001$ and $0.0001$ & $3.3660 \times 10^{-6}$                                    \\ \hline
+\end{tabular}
+\end{table}
+
+\noindent As we see in Table \ref{convergencemodelpoint}, our numerical solution is converging as we decrease $dt$ by a factor of $10$. If we had infinite computing power and could make $dt$ infinitely small, we would see the numerical solution converge to the analytic solution at the final time-step. We also want to test conservation of concentration of contaminant.
+
+
+\subsection{Conservation of Concentration for Point Source Model} \label{ConservationPointModelSection}
+Since we are not adding or removing any concentration of contaminant in our point source model, contaminant should be conserved. Therefore, we sum the total concentration of contaminant at each time-step in our numerical solution and plot it to see if there's any significant change in concentration of contaminant. When we do this, we obtain Figure \ref{conservationofconcentrationofcontaminant}.
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.5\linewidth]{pointconservation.png}
+    \caption{Conservation of Concentration of Contaminant}
+    \label{conservationofconcentrationofcontaminant}
+\end{figure}
+
+\noindent As we see in Figure \ref{conservationofconcentrationofcontaminant}, the concentration of contaminant is not fully conserved. We now check the rate as to how fast we are losing contaminant as time carries on so we employ a centered-difference numerical differentiation scheme which is a second order accurate method in order to find the derivative of the vector shown in Figure \ref{conservationofconcentrationofcontaminant}. When we do this, we obtain Figure \ref{derivcons} which shows the rate of change of contaminant in $\Omega$.
+
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.5\linewidth]{derivconservationeditdone.png}
+    \caption{Rate of Change of Concentration of Contaminant in $\Omega$}
+    \label{derivcons}
+\end{figure}
+
+\noindent As we see in Figure \ref{derivcons}, the rate of decrease of contaminant is on the order of $10^{-4}$ for the $230$ seconds of simulation time that we ran our program for. For small amounts of run time, this is not an issue. A reason for this decrease in contaminant could be the fact that we use a barycentric approximation of each triangular element that forms each basis function. We would remedy this problem by increasing our number of nodes $N$ and improving the approximations used to derive each mass matrix and the right-hand side. We could also employ a finite volume method to fix this issue.
+\subsection{Constant Source Model} \label{ConstantSourceModelSection}
+Using the same velocity vector field and diffusivity of $1$ square meter per second that we used in our point source solution, we will now model contaminant flow from a constant source along our boundary as shown in magenta in Figure \ref{pugetsounddomain2}. We add a constant amount of concentration of contaminant into our domain each time-step in addition to introducing a Gaussian, point source concentration of contaminant at the first time-step close to the magenta boundary in Figure \ref{pugetsounddomain2}. As stated in section \ref{DomainSection}, we choose the function value of the Gaussian initial condition at the peak to be close in value to the function value along the Dirichlet boundary highlighted in magenta shown in Figure \ref{pugetsounddomain2}. Long term, we expect a linear growth in the concentration of contaminant as time increases since the rate of growth of concentration of contaminant into our domain is constant. The following images show the contaminant flow for this situation when we run our program for $560$ seconds of simulation time. You'll find that the solution goes heavily unstable as it runs but then as time continues on, the diffusive term takes over and smooths out the solution resulting in stability.
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{const1.png}
+    \caption{Constant Source Numerical Solution at $t=0.2$ seconds}
+    \label{constant0.2seconds}
+\end{figure}
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{const2.png}
+    \caption{Constant Source Numerical Solution at $t=100$ seconds}
+    \label{constant100seconds}
+\end{figure}
+
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{const3.png}
+    \caption{Constant Source Numerical Solution at $t=200$ seconds}
+    \label{constant200seconds}
+\end{figure}
+
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{const4.png}
+    \caption{Constant Source Numerical Solution at $t=300$ seconds}
+    \label{constant300seconds}
+\end{figure}
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{const5.png}
+    \caption{Constant Source Numerical Solution at $t=400$ seconds}
+    \label{constant400seconds}
+\end{figure}
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{const6.png}
+    \caption{Constant Source Numerical Solution at $t=500$ seconds}
+    \label{constant500seconds}
+\end{figure}
+
+
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.3\linewidth]{const7.png}
+    \caption{Constant Source Numerical Solution at $t=560$ seconds}
+    \label{constant560seconds}
+\end{figure}
+
+\noindent Even though we have stability issues as the simulation continues, we find that we eventually reach stable results. As was the case with our point source model, we test this model for convergence and instead of conservation (since in this case we are adding in contaminant to our domain) we test for a long term linear increase of concentration of contaminant.
+
+
+\subsection{Convergence Testing Constant Source Model} \label{ConvergenceConstantModelSection}
+We use the same method for testing convergence in this case as we did when we tested for convergence in our point source model to obtain Table \ref{convergencemodelconstant}.
+
+\begin{table}[H]
+\centering
+\caption{Convergence Testing for Constant Source Model}
+\label{convergencemodelconstant}
+\begin{tabular}{|l|l|}
+\hline
+Time-Steps           & Euclidean Distance Between Numerical Solutions \\ \hline
+$0.1$ and $0.01$     & $2.8178 \times 10^{-4}$              \\ \hline
+$0.01$ and $0.001$   & $2.8262 \times 10^{-5}$              \\ \hline
+$0.001$ and $0.0001$ & $2.8271 \times 10^{-6}$                                      \\ \hline
+\end{tabular}
+\end{table}
+
+\noindent As we see in Table \ref{convergencemodelconstant}, our numerical solution is converging. We now test for addition of concentration of contaminant into our domain.
+
+\subsection{Conservation of Concentration for Constant Source Model} \label{IncreaseConstantModelSection}
+We test for addition of concentration of contaminant into our domain using the same methods as described before with our point source model. In this case, we expect to see a long term linear growth in the concentration of contaminant since the rate at which we add contaminant into our domain is constant. When we test this, we obtain Figure \ref{constantaddition}.
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.5\linewidth]{constincrease.png}
+    \caption{Addition of Concentration of Contaminant in $\Omega$}
+    \label{constantaddition}
+\end{figure}
+
+\noindent We see in Figure \ref{constantaddition} that as time increases, the total concentration of contaminant in $\Omega$ linearly increases. There's some slight instability issues that arise early on that are remedied by the diffusive term as time carries on which leads to a stable increase in concentration of contaminant. We now test the sensitivity of our numerical solutions to the diffusivity parameter, $D$.
+
+
+\section{Sensitivity Analyses} \label{SensitivityAnalysisSection}
+We test the sensitivity of our numerical results to $D$ by first selecting a set of nodes $i \in R$ such that $145 < i_{x} <155$ where $i_{x}$ is the $x$ coordinate of node $i$. Each node that is a part of this region is circled in Figure \ref{sensewall}.
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.5\linewidth]{sensewall.png}
+    \caption{Region Used to Measure Sensitivity of Solutions}
+    \label{sensewall}
+\end{figure}
+
+\noindent We start by measuring the total concentration of contaminant that flows through this region at each time-step with $D=1$. We then measure the total concentration of contaminant that flows through the region shown in Figure \ref{sensewall} by varying $D$ by $\pm 10\%$ of $1$ and compare these results against the numerical solution when $D=1$.
+
+\subsection{Sensitivity Analyses of Point Source Model} \label{SensitivityAnalysisPointSourceSection}
+We start with a sensitivity analysis of our point source model. We use the above mentioned method to obtain a graphical sensitivity of our numerical solution to our point source model to obtain Figure \ref{sensepoint}.
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.5\linewidth]{sensepoint.png}
+    \caption{Difference in Numerical Solutions at Different Diffusivities}
+    \label{sensepoint}
+\end{figure}
+
+
+\noindent As we see, there is very little graphical difference between solutions by varying $D$ by $\pm 10\%$. We now perform a numerical sensitivity analysis to measure the relative change in our numerical solution to our point source model at a time-step $n$ to relative changes in $D$. So, we utilize the following
+
+\begin{equation}
+S=\frac{\Delta U^{n}_{tot} D}{U^{n}_{tot} \Delta D}
+\end{equation}
+
+\noindent where $\Delta U^{n}_{tot}$ is the change in the total concentration of contaminant passing through the region shown in Figure \ref{sensewall} at time-step $n$, between numerical solutions when $D=1$ and $D=1.1$ or $D=0.9$. We also see that $\Delta D$ is the change in diffusivity and $U^{n}_{tot}$ is the total concentration of contaminant passing through the region shown in Figure \ref{sensewall} at time-step $n$ when $D=1.1$ or $D=0.9$. We measure the sensitivity of our numerical solution at the time-step where roughly most of the concentration of contaminant is present because that is the time when most environmental damage would occur to the area shown in Figure \ref{sensewall}. According to Figure \ref{sensepoint}, this time-step appears to be roughly when $n$ is $1900$ so we measure the sensitivity of our model to $\pm 10\%$ of the diffusivity coefficient at time-step $n=1900$. When we do this we obtain the Table \ref{sensitivitymodel1}
+
+
+\begin{table}[H]
+\centering
+\caption{Sensitivity Point Source Model}
+\label{sensitivitymodel1}
+\begin{tabular}{|l|l|}
+\hline
+Change in Diffusivity           & $S$ \\ \hline
+$+10\%$    & $-0.0773$              \\ \hline
+$-10\%$   & $0.0646$              \\ \hline
+\end{tabular}
+\end{table}
+\noindent As we see, our point source model in the region shown in Figure \ref{sensewall} is insensitive to small changes in $D$ at the time-step of $n=1900$.
+
+
+\subsection{Sensitivity Analyses Constant Source Model}  \label{SensitivityAnalysisConstantSourceSection}
+We now repeat the same process mentioned in the previous subsection for our constant source model and we first obtain the graphical sensitivity of our numerical solution to our constant source model as shown in Figure \ref{senseconst}.
+
+\begin{figure}[H]   
+\centering   
+   \includegraphics[trim=0mm 0mm 0mm 0mm,clip,width=0.5\linewidth]{senseconst.png}
+    \caption{Difference in Numerical Solutions at Different Diffusivities}
+    \label{senseconst}
+\end{figure}
+
+\noindent Graphically, our numerical solution to the constant source model appears to be more sensitive than our numerical solution to the point source model, however, the numerical solution to the constant source model graphically appears to be insensitive to small changes in the diffusivity parameter $D$. We repeat our numerical sensitivity analysis for our constant source model at time-step $n=5900$ (the time-step that appears to have the highest concentration of contaminant flowing through the region shown in Figure \ref{sensewall} as according to Figure \ref{senseconst}) and we obtain Table \ref{sensitivitymodel2}.
+
+\begin{table}[H]
+\centering
+\caption{Sensitivity Constant Source Model}
+\label{sensitivitymodel2}
+\begin{tabular}{|l|l|}
+\hline
+Change in Diffusivity           & $S$ \\ \hline
+$+10\%$    & $-0.0893$              \\ \hline
+$-10\%$   & $0.0870$              \\ \hline
+\end{tabular}
+\end{table}
+
+\noindent As we see, our constant source model is slightly more sensitive to changes in $D$ than our point source model however, the numerical solution to the constant source model is still insensitive to changes in $D$.
+
+\section{Future Work} \label{futureworksection}
+The first issue that needs to be addressed is the stability problem. In order to help fix this problem we would implement optimized meshing software to maximize the number of nodes we use in our finite element code. The next way we could improve on the stability issue is to find a way to avoid using a barycentric approximation of the basis functions when we build our stiffness matrix $\mathbf{A}$, mass matrices $\mathbf{B}$, $\mathbf{C}$, and right-hand side $\underline{b}$. After fixing the stability issue, we would then use a realistic diffusivity and magnitude for our velocity vector field. Finally, we want to optimize our tolerance scheme which we use to connect our finite element and finite difference code.
+\newpage
+\section{Conclusion} \label{conclusionsection}
+Contaminant spills in aquatic ecosystems cause immense damage to the environment. The goal of this paper is to expand on research that has already been done in order to mathematically predict how to most efficiently clean up a spill prior to an accident occurring. In this paper, we were able to give an overview of the finite element method, numerically solve the advection-diffusion equation and Navier-Stokes equations on a Puget Sound domain, offer results, and provide sensitivity analyses of our results. Using the ideas presented in this paper and in section \ref{futureworksection}, we can extend on the this work to better model contaminant flow in bodies of water.
+\newpage
+\section{Works Cited}
+\begin{thebibliography}{3}
+\bibitem{50LinesofMATLAB}
+\textit{Remarks around 50 lines of Matlab: short finite element implementation}, Jochen Alberty, Carsten Carstensen and Stefan A. Funken, \textit{Numerical Algorithms 20} (1999), pp. 117-137
+
+\bibitem{Johnson}
+\textit{Numerical Solution of Partial Differential Equations by the Finite Element Method}, Claes Johnson, Dover Publications, INC. Mineola, New York (2009) pp. 14-20
+
+%\bibitem{DiffusivityCoefficientat22degrees}
+%\textit{Modeling the BP Oil Spill of 2010: A Simplified Model of Oil Diffusion in Water}, Eilleen Ao-leong, Anna Chang, Steven Gu, \textit{BENG 221 - Fall 2012} (2012) pp. 4
+
+%\bibitem{Kinematic Viscosity of Water at 22 degrees}
+%http://www.viscopedia.com/viscosity-tables/substances/water/
+
+\bibitem{Sullivan}
+Dr. Eric Sullivan, Assistant Professor of Mathematics, Carroll College (2017)
+
+\end{thebibliography}
+
+\end{document}
+    
+    
+
+
+
+
+
+
+       

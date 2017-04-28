@@ -59,7 +59,7 @@ Advisor: Eric Sullivan Ph.D.}
     \label{abstractimage}
 \end{figure}
 
-In addition to graphically showing our results, we also provide convergence testing of both our numerical results at the final time step of both our models and find that the numerical results of our models are converging to an analytic solution. We also perform a graphical and numerical sensitivity analysis of our models and find that our numerical solutions to both our models are insensitive to small changes in the diffusivity parameter.
+In addition to graphically showing our results, we also provide convergence testing of both our numerical results at the final time-step of both our models and find that the numerical results of our models are converging to an analytic solution at that time-step. We also perform a graphical and numerical sensitivity analysis of our models and find that our numerical solutions to both our models are insensitive to small changes in the diffusivity parameter.
 
 
 
@@ -72,7 +72,9 @@ In addition to graphically showing our results, we also provide convergence test
 \newpage
 \lhead{List of Figures and List of Tables}
 \listoffigures
+\vspace{0.1in}\hrule
 \listoftables
+\vspace{0.1in}\hrule
 \newpage
 \lhead{}
 
@@ -92,7 +94,7 @@ Consider
 \begin{equation}\label{testfem1}
 -u'' \left(x \right)=f\left(x \right)
 \end{equation}
-where $u \in H^{1}\left(\Omega \right)$, $f \in L^{2}\left(\Omega\right)$, $u\left(0 \right) = u\left(1 \right) = 0$ for the domain, $\Omega = \{x:0<x<1\}$. The space $H^{1}$ is a Sobolev space whose functions and their first derivatives are square-integrable. The $L^{2}$ space is the space of all square-integrable functions \cite{Sullivan}. By integrating twice, we find there is an analytic solution $u(x)$, however, for purposes of this quick overview, we solve \eqref{testfem1} numerically by the finite element method. 
+where $u \in H^{1}\left(\Omega \right)$, $f \in L^{2}\left(\Omega\right)$, $u\left(0 \right) = u\left(1 \right) = 0$ for the domain, $\Omega = \{x:0<x<1\}$. The space, $H^{1}$, is a Sobolev space whose functions and their first derivatives are square-integrable. The $L^{2}$ space is the space of all square-integrable functions \cite{Sullivan}. By integrating twice, we find there is an analytic solution $u(x)$, however, for purposes of this quick overview, we solve \eqref{testfem1} numerically by the finite element method. 
 
 We start by getting the weak form of \eqref{testfem1} by multiplying both sides by a test function $v\in H^{1}\left(\Omega \right)$ and integrating both sides to get
 
@@ -135,7 +137,7 @@ where $x \in [0,1]$, $\beta_{i}=v\left(x_{i}\right)$, and $\xi_{j}=u\left(x_{j}\
 \mathbf{A}\underline{\xi}=\underline{b}.
 \end{equation}
 
-\noindent where we define the stiffness matrix, $\mathbf{A}$, as $\mathbf{A}_{i,j}=\int_{\Omega} \eta_{i}'\eta_{j}'dx$ and right-hand side, $\underline{b}$, as $\underline{b}_{i}= \int_{\Omega} f\left(x_{i}\right)\eta_{i}dx \text{ for } i,j=1,...,M$.
+\noindent where we define the stiffness matrix, $\mathbf{A}$, as $\mathbf{A}_{i,j}=\int_{\Omega} \eta_{i}'\eta_{j}'dx$ and right-hand side, $\underline{b}$, as $\underline{b}_{i}= \int_{\Omega} f\left(x_{i}\right)\eta_{i}dx$ for $i,j=1,...,M$.
 
 We compute the elements $\mathbf{A}$ by first noticing that $\eta_{i}'\eta_{j}'=0$ if $\abs{i-j}>1 \text{ } \forall \text{ } x\in [0,1]$. This fact causes $\mathbf{A}$ to be tri-diagonal. For this particular example, we partition our domain uniformly with $h_{j}=\frac{1}{M+1}$. To calculate the main diagonal of $\mathbf{A}$ we calculate
 
@@ -194,7 +196,7 @@ We start with our Puget Sound domain $\Omega \subset \mathbb{R}^{2}$ where $\Ome
     %left lower right upper
 \end{figure}
 
-\noindent We apply Neumann boundary conditions, $\Gamma_{\text{N}}$, along the boundary outlined in black while the red outlined boundary is a Dirichlet, $\Gamma_{\text{D}}$, such that $\Gamma = \Gamma_{\text{N}} \cup \Gamma_{\text{D}}$. We create two models of contaminant flow within the domain. The first model utilizes an arbitrarily chosen point source Gaussian initial condition of contaminant with the function value along the Dirichlet boundary being set to $0$. We also set the function value along the Neumann boundary to be $0$. The second model utilizes two sources of contaminant. The first source being a point source Gaussian initial condition of contaminant and the second being a constant source of contaminant along part of the shoreline in order to model a constant spill into $\Omega$. In order to model the spill on the shoreline, we choose to make an arbitrarily chosen portion of the Neumann boundary found in Figure \ref{pugetsounddomain}, Dirichlet, with a function value that is nonzero. We choose the function value along this portion of the Dirichlet boundary on the shoreline to be close in value to that of the peak of the Gaussian initial condition. The function value along the remaining Dirichlet boundary and the remaining Neumann boundary is set to $0$. We start this Gaussian initial condition so that the peak of the Gaussian is close to the shoreline boundary where the constant spill occurs. This new boundary condition is outlined in magenta in Figure \ref{pugetsounddomain2}
+\noindent We apply Neumann boundary conditions, $\Gamma_{\text{N}}$, along the boundary outlined in black while the red outlined boundary is Dirichlet, $\Gamma_{\text{D}}$, such that $\Gamma = \Gamma_{\text{N}} \cup \Gamma_{\text{D}}$. We create two models of contaminant flow within the domain. The first model utilizes an arbitrarily chosen point source Gaussian initial condition of contaminant with the function value along the Dirichlet boundary being set to $0$. We also set the function value along the Neumann boundary to be $0$. The second model utilizes two sources of contaminant. The first source being a point source Gaussian initial condition of contaminant and the second being a constant source of contaminant along part of the shoreline in order to model a constant spill into $\Omega$. In order to model the spill on the shoreline, we choose to make an arbitrarily chosen portion of the Neumann boundary found in Figure \ref{pugetsounddomain}, Dirichlet, with a function value that is nonzero. We choose the function value along this portion of the Dirichlet boundary on the shoreline to be close in value to that of the peak of the Gaussian initial condition. The function value along the remaining Dirichlet boundary and the remaining Neumann boundary is set to $0$. We start this Gaussian initial condition so that the peak of the Gaussian is close to the shoreline boundary where the constant spill occurs. This new boundary condition is outlined in magenta in Figure \ref{pugetsounddomain2}
 
 \begin{figure}[H]\label{MyDomain}
    
@@ -257,10 +259,10 @@ We start by creating a triangularization of $\Omega$, $T_{\Omega}$, by dividing 
 $$
 \eta_{k}\left(x_{i},y_{i}\right)=\begin{cases}
 1 \texttt{ if } i=k\\
-0 \texttt{ if } i\neq k \texttt{ for } i,k=1,...,N
+0 \texttt{ if } i\neq k \text{ for } i,k=1,...,N
 \end{cases} 
 $$
-where $N$ number of nodes that we specify in our domain $\Omega$.
+where $N$ is the number of nodes that we specify in our domain $\Omega$.
 
  We now continue our extension of ideas covered in \ref{OverviewFEM} and express $W$ and $U^{n}$ as a linear combination of basis functions multiplied by a finite approximation of $W$ and $U^{n}$ at some node $k=1,...,N$ to obtain the following
 
@@ -357,7 +359,7 @@ We now use our mass matrices and right hand side to rewrite \eqref{Weak Formthre
 \end{equation}
 
 
-The mathematical and coding techniques used to construct $\mathbf{A}$, $\mathbf{B}$, and $\underline{b}$ are covered in \cite{50LinesofMATLAB}. This resource takes care of the diffusive term and offers a treatment of the Neumann and Dirichlet boundary conditions. We now derive our own computation techniques for $\mathbf{C}$ as inspired by \cite{50LinesofMATLAB} which is used to compute the advection term. 
+The mathematical and coding techniques used to construct $\mathbf{A}$, $\mathbf{B}$, and $\underline{b}$ are covered in \cite{50LinesofMATLAB}. We see that \cite{50LinesofMATLAB} takes care of the diffusive term and offers a treatment of the Neumann and Dirichlet boundary conditions. We now derive our own computation techniques for $\mathbf{C}$ as inspired by \cite{50LinesofMATLAB} which is used to compute the advection term. 
 
 We start with \eqref{MatrixC}. Since each basis function is piecewise-continuous and linear, then $\underline{\nabla}\eta_{i}(x,y)$ is a constant gradient vector of the form
 
@@ -381,7 +383,7 @@ The integration of each basis function in \eqref{MatrixCagain} can be particular
 
 
 \begin{equation}\label{approximatebasiswithsource}
-\eta_{i} \left(x,y\right) \approx \eta_{i} \left(x_{\text{bc}},y_{\text{bc}}\right) = \frac{1}{3}, \text{ } i=1,...,N
+\eta_{i} \left(x,y\right) \approx \eta_{i} \left(x_{\text{bc}},y_{\text{bc}}\right) = \frac{1}{3}, \text{ } i=1,...,N.
 \end{equation}
 
 Using our barycentric approximation of the basis functions, \eqref{MatrixCagain} becomes
@@ -561,7 +563,7 @@ Since we are not adding or removing any concentration of contaminant in our poin
     \label{conservationofconcentrationofcontaminant}
 \end{figure}
 
-As we see in Figure \ref{conservationofconcentrationofcontaminant}, the concentration of contaminant is not fully conserved. We now check the rate as to how fast we are losing contaminant as time carries on so we employ a centered-difference numerical differentiation scheme which is a second order accurate method in order to find the derivative of the vector shown in Figure \ref{conservationofconcentrationofcontaminant}. When we do this, we obtain Figure \ref{derivcons} which shows the rate of change of contaminant in $\Omega$.
+As we see in Figure \ref{conservationofconcentrationofcontaminant}, the concentration of contaminant is not fully conserved. We now check the rate as to how fast we are losing contaminant as time carries on by employing a second order accurate, centered-difference numerical differentiation scheme in order to find the derivative of the vector shown in Figure \ref{conservationofconcentrationofcontaminant}. When we do this, we obtain Figure \ref{derivcons} which shows the rate of change of contaminant in $\Omega$.
 
 
 \begin{figure}[H]   
@@ -573,7 +575,7 @@ As we see in Figure \ref{conservationofconcentrationofcontaminant}, the concentr
 
 As we see in Figure \ref{derivcons}, the rate of decrease of contaminant is on the order of $10^{-4}$ for the $230$ seconds of simulation time that we ran our program for. For small amounts of run time, this is not an issue. A reason for this decrease in contaminant could be the fact that we use a barycentric approximation of each triangular element that forms each basis function. We would remedy this problem by increasing our number of nodes $N$ and improving the approximations used to derive each mass matrix and the right-hand side. We could also employ a finite volume method to fix this issue.
 \subsection{Constant Source Model} \label{ConstantSourceModelSection}
-Using the same velocity vector field and diffusivity of $1$ square meter per second that we used in our point source solution, we now model contaminant flow from a constant source along our boundary as shown in magenta in Figure \ref{pugetsounddomain2}. We add a constant amount of concentration of contaminant into our domain each time-step in addition to introducing a Gaussian, point source concentration of contaminant at the first time-step close to the magenta boundary in Figure \ref{pugetsounddomain2}. As stated in section \ref{DomainSection}, we choose the function value of the Gaussian initial condition at the peak to be close in value to the function value along the Dirichlet boundary highlighted in magenta shown in Figure \ref{pugetsounddomain2}. 
+Using the same velocity vector field and diffusivity of $1$ square meter per second that we used in our point source solution, we now model contaminant flow from a constant source along our boundary as shown in magenta in Figure \ref{pugetsounddomain2}. We add a constant amount of concentration of contaminant into our domain each time-step in addition to introducing a Gaussian point source concentration of contaminant at the first time-step close to the magenta boundary in Figure \ref{pugetsounddomain2}. As stated in section \ref{DomainSection}, we choose the function value of the Gaussian initial condition at the peak to be close in value to the function value along the Dirichlet boundary highlighted in magenta shown in Figure \ref{pugetsounddomain2}. 
 
 Long term, we expect a linear growth in the concentration of contaminant as time increases since the rate of growth of concentration of contaminant into our domain is constant. The following images show the contaminant flow for this situation when we run our program for $560$ seconds of simulation time. You'll find that the solution goes heavily unstable as it runs but then as time continues on, the diffusive term takes over and smooths out the solution resulting in stability.
 
@@ -691,10 +693,10 @@ We begin with a sensitivity analysis of our point source model. We use the above
 We now perform a numerical sensitivity analysis to measure the relative change in our numerical solution to our point source model at a time-step $n$ to relative changes in $D$. So, we utilize the following
 
 \begin{equation}
-S=\frac{\Delta U^{n}_{tot} D}{U^{n}_{tot} \Delta D}
+\text{S}=\frac{\Delta U^{n}_{tot} D}{U^{n}_{tot} \Delta D}
 \end{equation}
 
-\noindent where $\Delta U^{n}_{tot}$ is the change in the total concentration of contaminant passing through the region shown in Figure \ref{sensewall} at time-step $n$, between numerical solutions when $D=1$ and $D=1.1$ or $D=0.9$. We also see that $\Delta D$ is the change in diffusivity and $U^{n}_{tot}$ is the total concentration of contaminant passing through the region shown in Figure \ref{sensewall} at time-step $n$ when $D=1.1$ or $D=0.9$. We measure the sensitivity of our numerical solution at the time-step where roughly most of the concentration of contaminant is present because that is the time when most environmental damage would occur to the area shown in Figure \ref{sensewall}. According to Figure \ref{sensepoint}, this time-step appears to be roughly when $n$ is $1900$ so we measure the sensitivity of our model to $\pm 10\%$ of the diffusivity coefficient at time-step $n=1900$. When we do this we obtain the Table \ref{sensitivitymodel1}
+\noindent where $\Delta U^{n}_{tot}$ is the change in the total concentration of contaminant passing through the region shown in Figure \ref{sensewall} at time-step $n$, between numerical solutions when $D=1$ and $D=1.1$ or $D=0.9$. We also see that $\Delta D$ is the change in diffusivity, S is sensitivity (which has no units), and $U^{n}_{tot}$ is the total concentration of contaminant passing through the region shown in Figure \ref{sensewall} at time-step $n$ when $D=1.1$ or $D=0.9$. We measure the sensitivity of our numerical solution at the time-step where roughly most of the concentration of contaminant is present because that is the time when most environmental damage would occur to the area shown in Figure \ref{sensewall}. According to Figure \ref{sensepoint}, this time-step appears to be roughly when $n$ is $1900$ so we measure the sensitivity of our model to $\pm 10\%$ of the diffusivity coefficient at time-step $n=1900$. When we do this we obtain the Table \ref{sensitivitymodel1}
 
 
 \begin{table}[H]
@@ -703,7 +705,7 @@ S=\frac{\Delta U^{n}_{tot} D}{U^{n}_{tot} \Delta D}
 \label{sensitivitymodel1}
 \begin{tabular}{|l|l|}
 \hline
-Change in Diffusivity           & $S$ \\ \hline
+Change in Diffusivity           & S \\ \hline
 $+10\%$    & $-0.0773$              \\ \hline
 $-10\%$   & $0.0646$              \\ \hline
 \end{tabular}
@@ -721,7 +723,7 @@ We now repeat the same process mentioned in the previous subsection for our cons
     \label{senseconst}
 \end{figure}
 
-\noindent Graphically, our numerical solution to the constant source model appears to be more sensitive than our numerical solution to the point source model, however, the numerical solution to the constant source model graphically appears to be insensitive to small changes in the diffusivity parameter $D$. 
+\noindent Graphically, our numerical solution to the constant source model appears to be more sensitive than our numerical solution to the point source model. This being said, we do see that the numerical solution to the constant source model graphically appears to be insensitive to small changes in the diffusivity parameter $D$. 
 
 We repeat our numerical sensitivity analysis for our constant source model at time-step $n=5900$ (the time-step that appears to have the highest concentration of contaminant flowing through the region shown in Figure \ref{sensewall} as according to Figure \ref{senseconst}) and we obtain Table \ref{sensitivitymodel2}.
 
@@ -737,13 +739,13 @@ $-10\%$   & $0.0870$              \\ \hline
 \end{tabular}
 \end{table}
 
-\noindent As we see, our constant source model is slightly more sensitive to changes in $D$ than our point source model however, the numerical solution to the constant source model is still insensitive to changes in $D$.
+\noindent As we see, our constant source model is slightly more sensitive to changes in $D$ than our point source model however, our numerical solution to the constant source model is still insensitive to changes in $D$.
 
 \section{Future Work} \label{futureworksection}
 The first issue that needs to be addressed is the stability problem. In order to help fix this problem we would implement optimized meshing software to maximize the number of nodes we use in our finite element code. The next way we could improve on the stability issue is to find a way to avoid using a barycentric approximation of the basis functions when we build our stiffness matrix $\mathbf{A}$, mass matrices $\mathbf{B}$, $\mathbf{C}$, and right-hand side $\underline{b}$. After fixing the stability issue, we would then use a realistic diffusivity and magnitude for our velocity vector field. Finally, we want to optimize our tolerance scheme which we use to connect our finite element and finite difference code.
 \newpage
 \section{Conclusion} \label{conclusionsection}
-Contaminant spills in aquatic ecosystems cause immense damage to the environment. The goal of this paper is to expand on research that has already been done in order to mathematically predict how to most efficiently clean up a spill prior to an accident occurring. In this paper, we were able to give an overview of the finite element method, numerically solve the advection-diffusion equation and Navier-Stokes equations on a Puget Sound domain, offer results, and provide sensitivity analyses of our results. Using the ideas presented in this paper and in section \ref{futureworksection}, we can extend on the this work to better model contaminant flow in bodies of water.
+Contaminant spills in aquatic ecosystems cause immense damage to the environment. The goal of this paper is to expand on research that has already been done in order to mathematically predict how to most efficiently clean up a spill prior to an accident occurring. In this paper, we were able to give an overview of the finite element method, numerically solve the advection-diffusion equation and Navier-Stokes equations on a Puget Sound domain, offer results, and provide sensitivity analyses of our results. Using the ideas presented in this paper and in Section \ref{futureworksection}, we can extend on the this work to better model contaminant flow in bodies of water.
 \newpage
 \section{Works Cited}
 \begin{thebibliography}{3}
